@@ -70,7 +70,10 @@ void ozzylogic_test::update_ui() {
 void ozzylogic_test::connect_slots() {
     connect(treeview_, &QAbstractItemView::clicked, this, [&](const QModelIndex& idx) {
         if (idx.parent().isValid() && idx.column() == 1) {
-            qDebug() << "Empty slot";
+            auto* item = standardModel->itemFromIndex(standardModel->index(idx.row(), 0, idx.parent()));
+            const int mcc = item->data(countries_data_roles::mcc).toInt();
+            const int mnc = item->data(countries_data_roles::mnc).toInt();
+            on_operator_clicked(mcc, mnc);
         }
     });
 
@@ -101,6 +104,10 @@ void ozzylogic_test::on_treeview_double_click(const QModelIndex& idx) {
         connect(dialog, &operator_edit_dialog::operator_action_sig, p_db_, &c_database::operator_perform_action);
         dialog->edit_op(oper);
     }
+}
+
+void ozzylogic_test::on_operator_clicked(int mcc, int mnc) {
+    qDebug() << "Operator with mcc =" << mcc << "and mnc =" << mnc << "clicked. Empty slot has been called.";
 }
 
 void ozzylogic_test::check_folder_existence(std::filesystem::path p) {

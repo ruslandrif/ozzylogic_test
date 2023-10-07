@@ -21,6 +21,7 @@ public:
 
 private slots:
     void on_treeview_double_click(const QModelIndex& idx);
+    void on_operator_clicked(int mcc, int mnc);
 private:
     void update_ui();
     
