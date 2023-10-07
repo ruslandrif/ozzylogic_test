@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/ozzylogic_test">
+        <file>question.png</file>
+    </qresource>
+</RCC>
