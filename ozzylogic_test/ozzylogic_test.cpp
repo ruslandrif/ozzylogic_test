@@ -92,7 +92,8 @@ void ozzylogic_test::connect_slots() {
         }
     });
 
-    connect(p_db_.get(), &tst::db::c_database::table_updated, this, &ozzylogic_test::update_ui);
+    connect(p_db_.get(), &tst::db::c_database::table_updated, this, &ozzylogic_test::update_ui); //TODO update not all tree view, but only needed row
+
     connect(p_db_.get(), &tst::db::c_database::error, this, [&]() {
         QMessageBox::critical(this, "Database error", p_db_->last_error().c_str(), QMessageBox::Ok, QMessageBox::Close);
     });
