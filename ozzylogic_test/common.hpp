@@ -82,7 +82,7 @@ enum class operator_action {
 	unk
 };
 
-enum countries_data_roles {
+enum class countries_data_roles {
 	country_code = Qt::UserRole + 1,
 	mcc,
 	mnc,

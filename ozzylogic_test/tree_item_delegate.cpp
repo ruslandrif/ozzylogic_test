@@ -15,12 +15,7 @@ tree_item_delegate::tree_item_delegate(const std::vector<country>& recs, QObject
 QSize tree_item_delegate::sizeHint(const QStyleOptionViewItem& option,
     const QModelIndex& index) const {
 
-    auto ret = QStyledItemDelegate::sizeHint(option, index);
-
-    if (index.parent().isValid() && index.column() == 1) { //  + button 
-        ret.setWidth(30);
-    }
-    return ret;
+    return QStyledItemDelegate::sizeHint(option, index);
 }
 
 bool tree_item_delegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
@@ -40,7 +35,7 @@ bool tree_item_delegate::editorEvent(QEvent* event, QAbstractItemModel* model, c
 }
 
 void tree_item_delegate::flash_plus_button(const QModelIndex& index) {
-    QStandardItemModel* standard_model = (QStandardItemModel*)index.model();
+    const QStandardItemModel* standard_model = (QStandardItemModel*)index.model();
     QStandardItem* item = standard_model->itemFromIndex(index);
 
     const int country_rows_cnt = standard_model->itemFromIndex(index.parent())->rowCount();
@@ -64,7 +59,7 @@ void tree_item_delegate::flash_plus_button(const QModelIndex& index) {
 void tree_item_delegate::disable_all_plus_buttons(QStandardItemModel* model) {
     for (int i = 0; i < model->rowCount(); ++i) {
         const auto idx = model->index(i, 0);
-        auto* itm = model->itemFromIndex(idx);
+        const auto* itm = model->itemFromIndex(idx);
 
         for (int j = 0; j < itm->rowCount(); ++j) {
             const auto chuld_idx = model->index(j, 1, idx);

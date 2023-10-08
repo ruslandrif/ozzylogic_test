@@ -40,7 +40,7 @@ void c_database::add_operator(mob_operator op) {
 	//for me it seems that in the "operators table" can not be two rows with the same (mcc, mnc) pair. 
 	//But in the database there are not any constraints on that table, so I'm inserting new row very straightforward
 	const std::string query_str = std::format(
-		"insert into operators(mcc, mnc, name) values("
+		"INSERT INTO operators(mcc, mnc, name) VALUES("
 		"{},"
 		"{}, "
 		"\'{}\')", op.mcc(), op.mnc(), op.name());
@@ -96,16 +96,19 @@ std::vector<country> c_database::load_vector_countries() {
 	while (model->canFetchMore()) {
 		model->fetchMore();
 	}
+
 	res.reserve(model->rowCount());
 	std::string last_country;
 	int last_mcc{ 0 };
 
 	for (int i = 0; i < model->rowCount(); ++i) {
-		const int mcc = model->record(i).value("mcc").toInt();
-		const int mnc = model->record(i).value("mnc").toInt();
-		const std::string op_name = model->record(i).value("op_name").toString().toStdString();
-		const std::string c_name = model->record(i).value("c_name").toString().toStdString();
-		const std::string c_code = model->record(i).value("c_code").toString().toStdString();
+		const QSqlRecord rec = model->record(i);
+
+		const int mcc = rec.value("mcc").toInt();
+		const int mnc = rec.value("mnc").toInt();
+		const std::string op_name = rec.value("op_name").toString().toStdString();
+		const std::string c_name = rec.value("c_name").toString().toStdString();
+		const std::string c_code = rec.value("c_code").toString().toStdString();
 
 		if (last_country != c_name) {
 			last_mcc = mcc;
@@ -119,8 +122,8 @@ std::vector<country> c_database::load_vector_countries() {
 			res.back().add_mcc(mcc);
 		}
 
-		mob_operator oper(mcc, mnc, op_name);
-		res.back().add_operator(oper);
+		mob_operator oper{ mcc, mnc, op_name };
+		res.back().add_operator(std::move(oper));
 	}
 
 	res.shrink_to_fit();

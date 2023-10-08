@@ -26,9 +26,6 @@
     <QtRcc Include="ozzylogic_test.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
-    <QtUic Include="ozzylogic_test.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="ozzylogic_test.hpp">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -47,6 +44,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tree_item_delegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="operator_edit_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

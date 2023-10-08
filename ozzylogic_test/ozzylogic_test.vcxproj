@@ -68,6 +68,9 @@
   <PropertyGroup Label="QtDeploy" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtDeploy>true</QtDeploy>
   </PropertyGroup>
+  <PropertyGroup Label="QtDeploy" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtDeploy>true</QtDeploy>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -109,9 +112,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="operator_edit_dialog.cpp" />
     <ClCompile Include="tree_item_delegate.cpp" />
     <QtRcc Include="ozzylogic_test.qrc" />
-    <QtUic Include="ozzylogic_test.ui" />
     <QtMoc Include="ozzylogic_test.hpp" />
     <ClCompile Include="c_database.cpp" />
     <ClCompile Include="operators_model.cpp" />
