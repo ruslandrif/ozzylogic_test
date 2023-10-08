@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QHeaderView>
 
+using namespace tst::view;
+
 ozzylogic_test::ozzylogic_test(QWidget *parent)
     : QWidget(parent), treeview_(new QTreeView(this))
 {
@@ -14,7 +16,7 @@ ozzylogic_test::ozzylogic_test(QWidget *parent)
     layout_->addWidget(treeview_);
     layout_->addWidget(add_op_button_);
 
-    p_db_ = new c_database("system.db");
+    p_db_ = std::make_unique<tst::db::c_database>("system.db");
     if (!p_db_->init()) {
         QMessageBox::critical(this, "Error", p_db_->last_error().c_str(), QMessageBox::Ok);
         exit(-1);
@@ -23,7 +25,7 @@ ozzylogic_test::ozzylogic_test(QWidget *parent)
     check_folder_existence("Countries");
     check_folder_existence("Operators");
 
-    standardModel = new operators_model(this);
+    standardModel = new tst::model::operators_model(this);
     standardModel->setColumnCount(3);
     setMinimumSize(500, 700);
 
@@ -45,47 +47,60 @@ void ozzylogic_test::update_ui() {
     QStandardItem* rootNode = standardModel->invisibleRootItem();
 
     for (const auto& c : list_operators) {
-        auto* itm = new QStandardItem(c.name().c_str());
-        itm->setIcon(c.icon());
-        itm->setEditable(false);
-        itm->setData(QVariant(QString::fromStdString(c.code())), static_cast<int>(countries_data_roles::country_code));
-        for (const auto& op : c.operators()) {
-            auto* itm_op = new QStandardItem(std::format("{} ({}_{})", op.name().c_str(), op.mcc(), op.mnc()).c_str());
-            itm_op->setTextAlignment(Qt::AlignmentFlag::AlignLeft);
-            itm_op->setToolTip(itm_op->text());
-            itm_op->setIcon(op.icon());
-            itm_op->setData(op.mcc(), static_cast<int>(countries_data_roles::mcc));
-            itm_op->setData(op.mnc(), static_cast<int>(countries_data_roles::mnc));
-            itm_op->setData(QString::fromStdString(op.name()), static_cast<int>(countries_data_roles::operator_name));
-            itm_op->setData(QVariant(QString::fromStdString(c.code())), static_cast<int>(countries_data_roles::country_code));
-            itm->appendRow({ itm_op, new QStandardItem("")});
-        }
+        auto* country_item = get_country_st_item(c);
 
-        rootNode->appendRow({ itm, new QStandardItem("")});
+        rootNode->appendRow({ country_item, new QStandardItem("")});
     }
+
     treeview_->header()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     treeview_->header()->setStretchLastSection(false);
 }
 
+QStandardItem* ozzylogic_test::get_country_st_item(const tst::country& c) {
+    auto* itm = new QStandardItem(c.name().c_str());
+
+    itm->setIcon(c.icon());
+    itm->setEditable(false);
+    itm->setData(QVariant(QString::fromStdString(c.code())), countries_data_roles::country_code);
+
+    for (const auto& op : c.operators()) {
+        auto* itm_op = new QStandardItem(std::format("{} ({}_{})", op.name().c_str(), op.mcc(), op.mnc()).c_str());
+
+        itm_op->setTextAlignment(Qt::AlignmentFlag::AlignLeft);
+        itm_op->setToolTip(itm_op->text());
+
+        itm_op->setIcon(op.icon());
+
+        itm_op->setData(op.mcc(), countries_data_roles::mcc);
+        itm_op->setData(op.mnc(), countries_data_roles::mnc);
+        itm_op->setData(QString::fromStdString(op.name()), countries_data_roles::operator_name);
+        itm_op->setData(QString::fromStdString(c.code()), countries_data_roles::country_code);
+
+        itm->appendRow({ itm_op, new QStandardItem("") });
+    }
+
+    return itm;
+}
+
 void ozzylogic_test::connect_slots() {
     connect(treeview_, &QAbstractItemView::clicked, this, [&](const QModelIndex& idx) {
-        if (idx.parent().isValid() && idx.column() == 1) {
-            auto* item = standardModel->itemFromIndex(standardModel->index(idx.row(), 0, idx.parent()));
+        if (idx.parent().isValid() && idx.column() == tst::plus_button) {
+            auto* item = standardModel->itemFromIndex(standardModel->index(idx.row(), tst::element, idx.parent()));
             const int mcc = item->data(static_cast<int>(countries_data_roles::mcc)).toInt();
             const int mnc = item->data(static_cast<int>(countries_data_roles::mnc)).toInt();
             on_operator_clicked(mcc, mnc);
         }
     });
 
-    connect(p_db_, &c_database::table_updated, this, &ozzylogic_test::update_ui);
-    connect(p_db_, &c_database::error, this, [&]() {
+    connect(p_db_.get(), &tst::db::c_database::table_updated, this, &ozzylogic_test::update_ui);
+    connect(p_db_.get(), &tst::db::c_database::error, this, [&]() {
         QMessageBox::critical(this, "Database error", p_db_->last_error().c_str(), QMessageBox::Ok, QMessageBox::Close);
     });
 
     connect(treeview_, &QAbstractItemView::doubleClicked, this, &ozzylogic_test::on_treeview_double_click);
     connect(add_op_button_, &QPushButton::clicked, this, [&]() {
-        auto* dialog = new operator_edit_dialog("Add operator", list_operators, this);
-        connect(dialog, &operator_edit_dialog::operator_action_sig, p_db_, &c_database::operator_perform_action);
+        auto* dialog = new tst::control::operator_edit_dialog("Add operator", list_operators, this);
+        connect(dialog, &tst::control::operator_edit_dialog::operator_action_sig, p_db_.get(), &tst::db::c_database::operator_perform_action);
         dialog->add_operator();
     });
 }
@@ -101,8 +116,8 @@ void ozzylogic_test::on_treeview_double_click(const QModelIndex& idx) {
 
         mob_operator oper{ mcc, mnc, oper_name };
 
-        auto* dialog = new operator_edit_dialog("Edit operator", list_operators, this);
-        connect(dialog, &operator_edit_dialog::operator_action_sig, p_db_, &c_database::operator_perform_action);
+        auto* dialog = new tst::control::operator_edit_dialog("Edit operator", list_operators, this);
+        connect(dialog, &tst::control::operator_edit_dialog::operator_action_sig, p_db_.get(), &tst::db::c_database::operator_perform_action);
         dialog->edit_op(oper);
     }
 }
@@ -121,4 +136,10 @@ void ozzylogic_test::check_folder_existence(std::filesystem::path p) {
 ozzylogic_test::~ozzylogic_test()
 {
 
+}
+
+void ozzylogic_test::leaveEvent(QEvent* event) {
+    delegate_->disable_all_plus_buttons(standardModel);
+
+    QWidget::leaveEvent(event);
 }

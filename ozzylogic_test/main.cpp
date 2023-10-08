@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ozzylogic_test w;
+    tst::view::ozzylogic_test w;
     w.show();
     return a.exec();
 }

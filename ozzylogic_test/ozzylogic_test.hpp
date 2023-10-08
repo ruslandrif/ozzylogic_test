@@ -9,35 +9,41 @@
 #include "operators_model.h"
 #include "tree_item_delegate.hpp"
 
+namespace tst::view {
+    class ozzylogic_test : public QWidget
+    {
+        Q_OBJECT
 
-class ozzylogic_test : public QWidget
-{
-    Q_OBJECT
+    public:
+        ozzylogic_test(QWidget* parent = nullptr);
+        ~ozzylogic_test();
 
-public:
-    ozzylogic_test(QWidget *parent = nullptr);
-    ~ozzylogic_test();
-private slots:
-    void on_treeview_double_click(const QModelIndex& idx);
-    void on_operator_clicked(int mcc, int mnc);
-private:
-    void update_ui();
-    
-    void check_folder_existence(std::filesystem::path p);
+    protected:
+        void leaveEvent(QEvent* event);
+    private slots:
+        void on_treeview_double_click(const QModelIndex& idx);
+        void on_operator_clicked(int mcc, int mnc);
+    private:
+        void update_ui();
 
-    void connect_slots();
+        void check_folder_existence(std::filesystem::path p);
 
-    QTreeView* treeview_{ nullptr };
+        void connect_slots();
 
-    operators_model* standardModel{ nullptr };
+        QStandardItem* get_country_st_item(const tst::country& c);
 
-    QVBoxLayout* layout_{ nullptr };
+        QTreeView* treeview_{ nullptr };
 
-    QPushButton* add_op_button_;
+        tst::model::operators_model* standardModel{ nullptr };
 
-    std::vector<country> list_operators;
+        QVBoxLayout* layout_{ nullptr };
 
-    c_database* p_db_{ nullptr };
+        QPushButton* add_op_button_;
 
-    std::unique_ptr<tree_item_delegate> delegate_;
-};
+        std::vector<country> list_operators;
+
+        std::unique_ptr<tst::db::c_database> p_db_;
+
+        std::unique_ptr<tree_item_delegate> delegate_;
+    };
+}

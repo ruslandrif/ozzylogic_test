@@ -8,6 +8,8 @@
 #include <QIcon>
 #include <QEvent>
 
+using namespace tst::view;
+
 tree_item_delegate::tree_item_delegate(const std::vector<country>& recs, QObject* parent) : QStyledItemDelegate(parent), recs_(recs) {
 
 }
@@ -41,7 +43,7 @@ void tree_item_delegate::flash_plus_button(const QModelIndex& index) {
     const int country_rows_cnt = standard_model->itemFromIndex(index.parent())->rowCount();
 
     for (int i = 0; i < country_rows_cnt; ++i) {
-        const auto idx = standard_model->index(i, 1, index.parent());
+        const auto idx = standard_model->index(i, tst::plus_button, index.parent());
         QStandardItem* item = standard_model->itemFromIndex(idx);
 
         if (i == index.row()) {
@@ -58,11 +60,11 @@ void tree_item_delegate::flash_plus_button(const QModelIndex& index) {
 
 void tree_item_delegate::disable_all_plus_buttons(QStandardItemModel* model) {
     for (int i = 0; i < model->rowCount(); ++i) {
-        const auto idx = model->index(i, 0);
+        const auto idx = model->index(i, tst::element);
         const auto* itm = model->itemFromIndex(idx);
 
         for (int j = 0; j < itm->rowCount(); ++j) {
-            const auto chuld_idx = model->index(j, 1, idx);
+            const auto chuld_idx = model->index(j, tst::plus_button, idx);
             auto* itm_child = model->itemFromIndex(chuld_idx);
             itm_child->setText("");
             itm_child->setBackground(Qt::transparent);

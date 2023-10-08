@@ -8,83 +8,91 @@
 #include <QTreeView>
 #include <QScrollBar>
 
-struct mob_operator {
-public:
-	mob_operator() = delete;
+namespace tst {
+	struct mob_operator {
+	public:
+		mob_operator() = delete;
 
-	mob_operator(int mcc, int mnc, const std::string& name) : mcc_(mcc), mnc_(mnc), name_(name) {
-		icon_ = QIcon(search_icon(mcc_, mnc_).string().c_str());
-	}
+		mob_operator(int mcc, int mnc, const std::string& name) : mcc_(mcc), mnc_(mnc), name_(name) {
+			icon_ = QIcon(search_icon(mcc_, mnc_).string().c_str());
+		}
 
-	QIcon icon() const { return icon_.isNull() ? QIcon(QPixmap(":/ozzylogic_test/question.png")) : icon_; }
-	int mcc() const { return mcc_; }
-	int mnc() const { return mnc_; }
-	std::string name() const { return name_; }
+		QIcon icon() const { return icon_.isNull() ? QIcon(QPixmap(":/ozzylogic_test/question.png")) : icon_; }
+		int mcc() const { return mcc_; }
+		int mnc() const { return mnc_; }
+		std::string name() const { return name_; }
 
-	static std::filesystem::path search_icon(int mcc, int mnc) {
-		std::filesystem::path res = std::filesystem::path("Operators") / std::format("{}_{}.png", mcc, mnc);
-		
-		return std::filesystem::exists(res) ? res : std::filesystem::path();
-	}
+		static std::filesystem::path search_icon(int mcc, int mnc) {
+			std::filesystem::path res = std::filesystem::path("Operators") / std::format("{}_{}.png", mcc, mnc);
 
-private:
-	int mcc_{ 0 };
-	int mnc_{ 0 };
-	std::string name_;
-	QIcon icon_;
-};
+			return std::filesystem::exists(res) ? res : std::filesystem::path();
+		}
 
-struct country {
-	country() = delete;
+	private:
+		int mcc_{ 0 };
+		int mnc_{ 0 };
+		std::string name_;
+		QIcon icon_;
+	};
 
-	country(const std::string& name, const std::string& country_code, int mcc) : name_(name), code_(country_code)
-	{
-		icon_ = QIcon(search_icon(code_).string().c_str());
-		mcc_.push_back(mcc);
-	}
+	struct country {
+		country() = delete;
 
-	void add_operator(const mob_operator& op) {
-		operators_.emplace_back(op);
-	}
+		country(const std::string& name, const std::string& country_code, int mcc) : name_(name), code_(country_code)
+		{
+			icon_ = QIcon(search_icon(code_).string().c_str());
+			mcc_.push_back(mcc);
+		}
 
-	bool has_mcc(int m) const {
-		return std::find(mcc_.begin(), mcc_.end(), m) != mcc_.end();
-	}
+		void add_operator(const mob_operator& op) {
+			operators_.emplace_back(op);
+		}
 
-	void add_mcc(int m) { mcc_.push_back(m); }
+		bool has_mcc(int m) const {
+			return std::find(mcc_.begin(), mcc_.end(), m) != mcc_.end();
+		}
 
-	std::string code() const { return code_; }
-	std::string name() const { return name_; }
-	std::vector<int> mcc() const { return mcc_; }
-	
-	std::vector<mob_operator> operators() const { return operators_; }
+		void add_mcc(int m) { mcc_.push_back(m); }
 
-	QIcon icon() const { return icon_.isNull() ? QIcon(QPixmap(":/ozzylogic_test/question.png")) : icon_; }
+		std::string code() const { return code_; }
+		std::string name() const { return name_; }
+		std::vector<int> mcc() const { return mcc_; }
 
-	static std::filesystem::path search_icon(const std::string& country_code) {
-		std::filesystem::path res = std::filesystem::path("Countries") / std::format("{}.png", country_code);
-		
-		return std::filesystem::exists(res) ? res : std::filesystem::path();
-	}
+		std::vector<mob_operator> operators() const { return operators_; }
 
-private:
-	std::string name_;
-	std::string code_;
-	std::vector<int> mcc_;
-	std::vector<mob_operator> operators_;
+		QIcon icon() const { return icon_.isNull() ? QIcon(QPixmap(":/ozzylogic_test/question.png")) : icon_; }
 
-	QIcon icon_;
-};
+		static std::filesystem::path search_icon(const std::string& country_code) {
+			std::filesystem::path res = std::filesystem::path("Countries") / std::format("{}.png", country_code);
 
-enum class operator_action {
-	add,
-	edit,
-	unk
-};
+			return std::filesystem::exists(res) ? res : std::filesystem::path();
+		}
 
-enum class countries_data_roles {
-	country_code = Qt::UserRole + 1,
-	mcc,
-	mnc,
-	operator_name
-};
+	private:
+		std::string name_;
+		std::string code_;
+		std::vector<int> mcc_;
+		std::vector<mob_operator> operators_;
+
+		QIcon icon_;
+	};
+
+	enum class operator_action {
+		add,
+		edit,
+		unk
+	};
+
+	enum countries_data_roles {
+		country_code = Qt::UserRole + 1,
+		mcc,
+		mnc,
+		operator_name
+	};
+
+	enum table_columns_indices {
+		element,
+		plus_button
+	};
+}
+

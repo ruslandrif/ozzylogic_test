@@ -1,5 +1,6 @@
 #include "operators_model.h"
 
+using namespace tst::model;
 
 Qt::ItemFlags operators_model::flags(const QModelIndex& index) const {
     return Qt::ItemFlag::ItemIsEnabled;

@@ -3,6 +3,8 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+using namespace tst::db;
+
 c_database::c_database(const std::filesystem::path& db_path, QObject* parent) : db_path_(db_path), QObject(parent) {
 
 }
@@ -28,15 +30,17 @@ void c_database::operator_perform_action(mob_operator op, operator_action act) {
 	switch (act) {
 	case operator_action::add:
 		add_operator(op);
+		break;
 	case operator_action::edit:
 		update_operator(op);
+		break;
 	case operator_action::unk:
 	default:
 		break;
 	}
 }
 
-void c_database::add_operator(mob_operator op) {
+void c_database::add_operator(tst::mob_operator op) {
 	//for me it seems that in the "operators table" can not be two rows with the same (mcc, mnc) pair. 
 	//But in the database there are not any constraints on that table, so I'm inserting new row very straightforward
 	const std::string query_str = std::format(
@@ -54,6 +58,7 @@ void c_database::add_operator(mob_operator op) {
 }
 
 void c_database::update_operator(mob_operator op) {
+	//if we have two or more operators with the same mcc and mnc values, we will update them all (?...)
 	const std::string query_str = std::format("UPDATE operators SET name = \'{}\' WHERE mcc = {} AND mnc = {}", op.name(), op.mcc(), op.mnc());
 	
 	QSqlQuery q(db_);
@@ -75,13 +80,12 @@ bool c_database::execute_query(QSqlQuery& q, const std::string& s) {
 	return res;
 }
 
-std::vector<country> c_database::load_vector_countries() {
-	std::vector<country> res;
+QSqlQueryModel* c_database::load_countries_model() {
 	auto* model = new QSqlQueryModel(this);
 
 	QSqlQuery quer(db_);
 
-	const std::string query_str = 
+	const std::string query_str =
 		"SELECT operators.mcc as mcc, operators.mnc as mnc, operators.name as op_name, countries.name as c_name, countries.code as c_code"
 		" FROM operators"
 		" JOIN countries ON operators.mcc = countries.mcc"
@@ -89,7 +93,7 @@ std::vector<country> c_database::load_vector_countries() {
 
 	if (!execute_query(quer, query_str)) {
 		emit error();
-		return {};
+		return nullptr;
 	}
 
 	model->setQuery(quer);
@@ -97,12 +101,22 @@ std::vector<country> c_database::load_vector_countries() {
 		model->fetchMore();
 	}
 
-	res.reserve(model->rowCount());
+	return model;
+}
+
+std::vector<tst::country> c_database::load_vector_countries() {
+	std::vector<country> res;
+	
+	QSqlQueryModel* model_operators = load_countries_model();
+	if (!model_operators)
+		return {};
+
+	res.reserve(model_operators->rowCount());
 	std::string last_country;
 	int last_mcc{ 0 };
 
-	for (int i = 0; i < model->rowCount(); ++i) {
-		const QSqlRecord rec = model->record(i);
+	for (int i = 0; i < model_operators->rowCount(); ++i) {
+		const QSqlRecord rec = model_operators->record(i);
 
 		const int mcc = rec.value("mcc").toInt();
 		const int mnc = rec.value("mnc").toInt();
@@ -113,7 +127,7 @@ std::vector<country> c_database::load_vector_countries() {
 		if (last_country != c_name) {
 			last_mcc = mcc;
 			last_country = c_name;
-			country rec(last_country, c_code, mcc);
+			country rec{ last_country, c_code, mcc };
 			
 			res.push_back(std::move(rec));
 		}

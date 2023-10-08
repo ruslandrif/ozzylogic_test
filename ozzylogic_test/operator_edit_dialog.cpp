@@ -1,5 +1,7 @@
 #include "operator_edit_dialog.hpp"
 
+using namespace tst::control;
+
 operator_edit_dialog::operator_edit_dialog(const std::string& name, const std::vector<country>& recs, QWidget* parent) : QDialog(parent), records_(recs) {
 	setWindowTitle(name.c_str());
 
@@ -18,9 +20,10 @@ operator_edit_dialog::operator_edit_dialog(const std::string& name, const std::v
 	main_layout_->addLayout(buttons_l);
 
 	name_lbl_ = new QLabel("Name");
-	mcc_lbl_ = new QLabel("mcc");
-	mnc_lbl_ = new QLabel("mnc");
+	mcc_lbl_ = new QLabel("MCC");
+	mnc_lbl_ = new QLabel("MNC");
 	main_lbl = new QLabel("Operator editor");
+	main_lbl->setStyleSheet("font-weight: bold;");
 
 	country_flag_lbl = new QLabel;
 	op_logo_lbl = new QLabel;

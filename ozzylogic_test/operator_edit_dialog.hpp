@@ -8,33 +8,51 @@
 #include <QPushButton>
 #include "common.hpp"
 
+namespace tst::control {
+	class operator_edit_dialog : public QDialog {
+		Q_OBJECT
+	public:
+		operator_edit_dialog(const std::string& name, const std::vector<country>& recs, QWidget* parent);
 
-class operator_edit_dialog : public QDialog {
-	Q_OBJECT
-public:
-	operator_edit_dialog(const std::string& name, const std::vector<country>& recs, QWidget* parent);
+		void edit_op(const mob_operator& op);
 
-	void edit_op(const mob_operator& op);
+		void add_operator();
+	signals:
+		void operator_action_sig(mob_operator, operator_action);
+	private slots:
+		void emit_new_operator();
 
-	void add_operator();
-signals:
-	void operator_action_sig(mob_operator, operator_action);
-private slots:
-	void emit_new_operator();
+	private:
+		void search_icons();
 
-private:
-	void search_icons();
+		QHBoxLayout* top_label_l_{ nullptr };
+		QHBoxLayout* name_l_{ nullptr };
+		QHBoxLayout* mcc_l_{ nullptr };
+		QHBoxLayout* mnc_l_{ nullptr };
+		QHBoxLayout* buttons_l{ nullptr };
 
-	QHBoxLayout *top_label_l_{ nullptr }, *name_l_{ nullptr }, *mcc_l_{ nullptr }, *mnc_l_{ nullptr }, *buttons_l{nullptr};
-	QVBoxLayout* main_layout_{ nullptr };
-	QLabel *name_lbl_, *mcc_lbl_, *mnc_lbl_, *main_lbl, *country_flag_lbl, *op_logo_lbl;
-	QLineEdit *name_edit_, *mnc_edit_, *mcc_edit;
-	QPushButton *ok_b, *cancel_b;
+		QVBoxLayout* main_layout_{ nullptr };
 
-	operator_action action_{ operator_action::unk };
+		QLabel* name_lbl_{ nullptr };
+		QLabel* mcc_lbl_{ nullptr };
+		QLabel* mnc_lbl_{ nullptr };
+		QLabel* main_lbl{ nullptr };
+		QLabel* country_flag_lbl{ nullptr };
+		QLabel* op_logo_lbl{ nullptr };
 
-	std::vector<country> records_;
+		QLineEdit* name_edit_{ nullptr };
+		QLineEdit* mnc_edit_{ nullptr };
+		QLineEdit* mcc_edit{ nullptr };
 
-	int mcc_top_border = 1000;
-	int mnc_top_border = 1000;
-};
+		QPushButton* ok_b{ nullptr };
+		QPushButton* cancel_b{ nullptr };
+
+		operator_action action_{ operator_action::unk };
+
+		std::vector<country> records_;
+
+		int mcc_top_border = 1000;
+		int mnc_top_border = 1000;
+	};
+
+}
