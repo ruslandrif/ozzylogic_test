@@ -1,4 +1,5 @@
 #include "operator_edit_dialog.hpp"
+#include <QMessageBox>
 
 using namespace tst::control;
 
@@ -94,11 +95,16 @@ void operator_edit_dialog::add_operator() { //add new operator
 }
 
 void operator_edit_dialog::emit_new_operator() {
-	mob_operator oper(mcc_edit->text().toInt(), mnc_edit_->text().toInt(), name_edit_->text().toStdString());
+	if (values_entered()) {
+		mob_operator oper(mcc_edit->text().toInt(), mnc_edit_->text().toInt(), name_edit_->text().toStdString());
 
-	emit operator_action_sig(oper, action_);
+		emit operator_action_sig(oper, action_);
 
-	accept();
+		accept();
+	}
+	else {
+		QMessageBox::warning(this, "Error", "Please, enter all required values", QMessageBox::Ok);
+	}
 }
 
 void operator_edit_dialog::search_icons() {

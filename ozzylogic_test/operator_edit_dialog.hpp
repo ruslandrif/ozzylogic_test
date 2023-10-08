@@ -25,6 +25,10 @@ namespace tst::control {
 	private:
 		void search_icons();
 
+		bool values_entered() const { 
+			return !mcc_edit->text().isEmpty() && !mnc_edit_->text().isEmpty() && !name_edit_->text().isEmpty(); 
+		}
+
 		QHBoxLayout* top_label_l_{ nullptr };
 		QHBoxLayout* name_l_{ nullptr };
 		QHBoxLayout* mcc_l_{ nullptr };
