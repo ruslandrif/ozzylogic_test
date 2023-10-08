@@ -23,6 +23,7 @@ namespace tst::view {
     private slots:
         void on_treeview_double_click(const QModelIndex& idx);
         void on_operator_clicked(int mcc, int mnc);
+        void update_operator(mob_operator, operator_action);
     private:
         void update_ui();
 

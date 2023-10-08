@@ -48,17 +48,18 @@ void c_database::add_operator(tst::mob_operator op) {
 		"{},"
 		"{}, "
 		"\'{}\')", op.mcc(), op.mnc(), op.name());
+
 	QSqlQuery q(db_);															
 	if (!execute_query(q, query_str)) {											
 		emit error();
 	}
 	else {
-		emit table_updated();
+		emit table_updated(op, operator_action::add);
 	}
 }
 
 void c_database::update_operator(mob_operator op) {
-	//if we have two or more operators with the same mcc and mnc values, we will update them all (?...)
+	//if we have two or more operators with the same mcc and mnc values, we will update them all?...
 	const std::string query_str = std::format("UPDATE operators SET name = \'{}\' WHERE mcc = {} AND mnc = {}", op.name(), op.mcc(), op.mnc());
 	
 	QSqlQuery q(db_);
@@ -66,7 +67,7 @@ void c_database::update_operator(mob_operator op) {
 		emit error();
 	}
 	else {
-		emit table_updated();
+		emit table_updated(op, operator_action::edit);
 	}
 }
 

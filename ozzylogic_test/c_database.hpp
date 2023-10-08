@@ -20,7 +20,7 @@ namespace tst::db {
 		void operator_perform_action(mob_operator, operator_action);
 	signals:
 		void error();
-		void table_updated();
+		void table_updated(mob_operator, operator_action);
 	private:
 		void add_operator(mob_operator);
 		void update_operator(tst::mob_operator);

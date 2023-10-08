@@ -17,6 +17,10 @@ namespace tst {
 			icon_ = QIcon(search_icon(mcc_, mnc_).string().c_str());
 		}
 
+		bool operator==(const mob_operator& other) {
+			return mcc_ == other.mcc() && mnc_ == other.mnc();
+		}
+
 		QIcon icon() const { return icon_.isNull() ? QIcon(QPixmap(":/ozzylogic_test/question.png")) : icon_; }
 		int mcc() const { return mcc_; }
 		int mnc() const { return mnc_; }
@@ -46,6 +50,14 @@ namespace tst {
 
 		void add_operator(const mob_operator& op) {
 			operators_.emplace_back(op);
+		}
+
+		void update_operator(const mob_operator& op) {
+			for (auto& oper : operators_) {
+				if (oper == op) {
+					oper = op;
+				}
+			}
 		}
 
 		bool has_mcc(int m) const {

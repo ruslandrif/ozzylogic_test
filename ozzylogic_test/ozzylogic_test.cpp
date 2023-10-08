@@ -63,6 +63,12 @@ QStandardItem* ozzylogic_test::get_country_st_item(const tst::country& c) {
     itm->setEditable(false);
     itm->setData(QVariant(QString::fromStdString(c.code())), countries_data_roles::country_code);
 
+    QList<QVariant> mcc_list;
+    for (auto m : c.mcc())
+        mcc_list << m;
+
+    itm->setData(mcc_list, countries_data_roles::mcc);
+
     for (const auto& op : c.operators()) {
         auto* itm_op = new QStandardItem(std::format("{} ({}_{})", op.name().c_str(), op.mcc(), op.mnc()).c_str());
 
@@ -92,7 +98,7 @@ void ozzylogic_test::connect_slots() {
         }
     });
 
-    connect(p_db_.get(), &tst::db::c_database::table_updated, this, &ozzylogic_test::update_ui); //TODO update not all tree view, but only needed row
+    connect(p_db_.get(), &tst::db::c_database::table_updated, this, &ozzylogic_test::update_operator); //TODO update not all tree view, but only needed row
 
     connect(p_db_.get(), &tst::db::c_database::error, this, [&]() {
         QMessageBox::critical(this, "Database error", p_db_->last_error().c_str(), QMessageBox::Ok, QMessageBox::Close);
@@ -125,6 +131,35 @@ void ozzylogic_test::on_treeview_double_click(const QModelIndex& idx) {
 
 void ozzylogic_test::on_operator_clicked(int mcc, int mnc) {
     qDebug() << "Operator with mcc =" << mcc << "and mnc =" << mnc << "clicked. Empty slot has been called.";
+}
+
+void ozzylogic_test::update_operator(tst::mob_operator op, operator_action act) {
+    const auto country_iter = std::find_if(list_operators.begin(), list_operators.end(), [&op] (const auto& c) { return c.has_mcc(op.mcc()); });
+    
+    if (country_iter == list_operators.end())
+        return;
+
+    switch (act) {
+    case operator_action::add:
+        country_iter->add_operator(op);
+        break;
+    case operator_action::edit:
+        country_iter->update_operator(op);
+        break;
+    case operator_action::unk:
+    default:
+        break;
+    }
+
+    auto* root = standardModel->invisibleRootItem();
+    for (int i = 0; i < root->rowCount(); ++i) {
+        auto* row = root->child(i);
+        const QList<QVariant> mcc = row->data(tst::mcc).toList();
+        if(mcc.contains(QVariant(op.mcc()))) {
+            root->setChild(i, get_country_st_item(*country_iter));
+            break;
+        }
+    }
 }
 
 void ozzylogic_test::check_folder_existence(std::filesystem::path p) {
